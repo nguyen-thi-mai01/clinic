@@ -1,0 +1,8 @@
+node_modules/
+.env
+client/build/
+server/logs/
+*.log
+server/uploads/images/
+server/uploads/medical-files/
+server/.env
