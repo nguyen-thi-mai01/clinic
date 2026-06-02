@@ -621,27 +621,6 @@ exports.requestPasswordReset = async (req, res) => {
     user.reset_expires = reset_expires;
     await user.save();
 
-      // Nếu user đã là staff, cho phép cập nhật department/rank/permissions khi admin gửi
-      if (user.role === 'staff' && (department !== undefined || rank !== undefined)) {
-        const staff = await models.Staff.findOne({ where: { user_id: userId } });
-        if (staff) {
-          if (department !== undefined) staff.department = department;
-          if (rank !== undefined) staff.rank = rank;
-          // Cập nhật permissions theo template khi department/rank thay đổi
-          try {
-            staff.permissions = getPermissionsTemplate(staff.department || null, staff.rank || 'staff');
-          } catch (err) {
-            // Nếu template không hợp lệ, giữ nguyên permissions hiện có
-            console.warn('Không thể cập nhật permissions từ template:', err.message);
-          }
-          await staff.save();
-        } else {
-          // Nếu chưa có bản ghi staff (hiếm), tạo mới
-          const perms = getPermissionsTemplate(department || null, rank || 'staff');
-          await models.Staff.create({ user_id: userId, department: department || null, rank: rank || 'staff', permissions: perms });
-        }
-      }
-
     console.log('[requestPasswordReset] Đã lưu token vào DB');
 
     // Gửi email xác thực reset password
