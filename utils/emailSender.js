@@ -28,16 +28,15 @@ const BASE_STYLE = `
 const createTransporter = () => {
   const config = {
     host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
+    port: 587,
+    secure: false,
+    requireTLS: true,
     auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_PASS },
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 10000
+    connectionTimeout: 15000,
+    greetingTimeout: 15000,
+    socketTimeout: 15000
   };
-  console.log('[Email System] GMAIL_USER:', process.env.GMAIL_USER ? process.env.GMAIL_USER : 'MISSING');
-  console.log('[Email System] GMAIL_PASS length:', process.env.GMAIL_PASS ? process.env.GMAIL_PASS.length : 'MISSING');
-  console.log('[Email System] CLIENT_URL:', process.env.CLIENT_URL ? process.env.CLIENT_URL : 'MISSING');
+  if (process.env.NODE_ENV === 'development') console.log('[Email System] Running in development mode');
   return nodemailer.createTransport(config);
 };
 
