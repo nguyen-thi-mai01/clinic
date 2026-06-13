@@ -31,11 +31,13 @@ const createTransporter = () => {
     port: 465,
     secure: true,
     auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_PASS },
-    connectionTimeout: 10000, // Cắt kết nối nếu Google không phản hồi sau 10s (Tránh lỗi 502)
+    connectionTimeout: 10000,
     greetingTimeout: 10000,
     socketTimeout: 10000
   };
-  if (process.env.NODE_ENV === 'development') console.log('[Email System] Running in development mode');
+  console.log('[Email System] GMAIL_USER:', process.env.GMAIL_USER ? process.env.GMAIL_USER : 'MISSING');
+  console.log('[Email System] GMAIL_PASS length:', process.env.GMAIL_PASS ? process.env.GMAIL_PASS.length : 'MISSING');
+  console.log('[Email System] CLIENT_URL:', process.env.CLIENT_URL ? process.env.CLIENT_URL : 'MISSING');
   return nodemailer.createTransport(config);
 };
 
