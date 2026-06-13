@@ -1,5 +1,5 @@
 // server/utils/emailSender.js
-const nodemailer = require('nodemailer');
+
 
 const BASE_STYLE = `
   <style>
@@ -25,43 +25,27 @@ const BASE_STYLE = `
   </style>
 `;
 
-const createTransporter = () => {
-  const config = {
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false,
-    requireTLS: true,
-    auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_PASS },
-    connectionTimeout: 15000,
-    greetingTimeout: 15000,
-    socketTimeout: 15000
-  };
-  if (process.env.NODE_ENV === 'development') console.log('[Email System] Running in development mode');
-  return nodemailer.createTransport(config);
-};
+const { Resend } = require('resend');
 
 const sendEmail = async (emailData) => {
   try {
-    const { to, cc, bcc, subject, template, data, html, text } = emailData;
-
+    const { to, subject, template, data, html, text } = emailData;
     if (!to || !subject) throw new Error('Email address and subject are required');
 
-    let emailContent = {
-      html: html || generateHTMLFromTemplate(template, data),
-      text: text || generateTextFromTemplate(template, data)
-    };
+    const emailContent = html || generateHTMLFromTemplate(template, data);
+    const textContent = text || generateTextFromTemplate(template, data);
 
-    const transporter = createTransporter();
-    const mailOptions = {
-      from: `"${process.env.HOSPITAL_NAME || 'Easy Medify'}" <${process.env.GMAIL_USER}>`,
-      to, cc, bcc, subject,
-      html: emailContent.html,
-      text: emailContent.text
-    };
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    const result = await resend.emails.send({
+      from: `${process.env.HOSPITAL_NAME || 'Easy Medify'} <onboarding@resend.dev>`,
+      to,
+      subject,
+      html: emailContent,
+      text: textContent
+    });
 
-    const result = await transporter.sendMail(mailOptions);
-    console.log(`Email sent successfully to ${to}. MessageID: ${result.messageId}`);
-    return { success: true, messageId: result.messageId, message: 'Email sent successfully' };
+    console.log(`Email sent successfully to ${to}. ID: ${result.data?.id}`);
+    return { success: true, messageId: result.data?.id, message: 'Email sent successfully' };
   } catch (error) {
     console.error('Error sending email:', error);
     return { success: false, error: error.message, message: 'Failed to send email' };
