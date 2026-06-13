@@ -81,7 +81,7 @@ router.post('/events/distribute-gift', roleMiddleware('events_vouchers:edit_even
 router.get('/events/:event_id/command-center', roleMiddleware('events_vouchers:view_events', ['admin']), marketingController.getCommandCenterStats);
 
 // ✅ API CHO CẤU HÌNH ĐIỂM DANH & VÒNG QUAY (ĐỔI ĐIỂM)
-router.get('/loyalty-config', authMiddleware, roleMiddleware('events_vouchers:config_rewards', ['admin']), marketingController.getLoyaltyConfig);
+router.get('/loyalty-config', marketingController.getLoyaltyConfig);
 router.put('/loyalty-config', authMiddleware, roleMiddleware('events_vouchers:config_rewards', ['admin']), marketingController.updateLoyaltyConfig);
 
 module.exports = router;

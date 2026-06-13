@@ -106,7 +106,7 @@ async function sendReminderNotification(appointment) {
       type: 'appointment_reminder',
       title: `Nhắc nhở: Khám bệnh ${formattedTime}`,
       message: `Bạn có lịch hẹn khám với ${appointment.Doctor?.user?.full_name || 'bác sĩ'} vào ${formattedTime}. ${appointment.payment_status === 'unpaid' ? '[Cần thanh toán]' : ''}`,
-      link: `/appointments/${appointment.code}`,
+      link: `/lich-hen/${appointment.code}`,
       data: notificationData
     });
 

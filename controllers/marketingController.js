@@ -479,9 +479,7 @@ const marketingController = {
       });
       res.json({
         success: true,
-        promotions: computedPromotions,
-        statistics,
-        topPromotions
+        promotions
       });
     } catch (error) {
       res.status(500).json({ success: false, message: error.message });

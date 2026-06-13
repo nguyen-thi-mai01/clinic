@@ -943,9 +943,10 @@ exports.getMyMedicalRecords = async (req, res) => {
     });
 
     // 2. Lấy kết quả tư vấn online (Consultation đã completed và có diagnosis)
+   // Consultation.patient_id = User.id, khác với Patient.id
     const consultationWhere = doctorId
       ? { doctor_id: doctorId, status: 'completed' }
-      : { patient_id: patientId, status: 'completed' };
+      : { patient_id: userId, status: 'completed' }; // ← dùng userId thay vì patientId
 
     const consultations = await models.Consultation.findAll({
   where: { ...consultationWhere, diagnosis: { [Op.ne]: null } },

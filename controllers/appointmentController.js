@@ -3847,6 +3847,45 @@ exports.getSlotsStatsToday = async (req, res) => {
   }
 };
 
+/**
+ * @desc    Lấy danh sách ratings công khai (không cần auth)
+ * @route   GET /api/appointments/public-ratings
+ * @access  Public
+ */
+exports.getPublicRatings = async (req, res) => {
+  try {
+    const { limit = 20 } = req.query;
+
+    const ratings = await models.Rating.findAll({
+      where: {
+        status: 'approved',
+        service_type: ['appointment', 'consultation'],
+        review: { [Op.ne]: null },
+        rating: { [Op.gte]: 4 }  // Chỉ hiện 4-5 sao
+      },
+      include: [
+        {
+          model: models.User,
+          as: 'patient',
+          attributes: ['full_name']
+        },
+        {
+          model: models.User,
+          as: 'doctor',
+          attributes: ['full_name']
+        }
+      ],
+      order: [['created_at', 'DESC']],
+      limit: parseInt(limit)
+    });
+
+    res.json({ success: true, data: ratings });
+  } catch (error) {
+    console.error('ERROR getPublicRatings:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 module.exports = exports;
 
 

@@ -258,17 +258,37 @@ wss.on('connection', (ws, req) => {
 
         // Client tham gia phòng consultation
         case 'join_consultation':
-          currentConsultationId = String(payload.consultation_id);
-          if (!consultationRooms.has(currentConsultationId)) {
-            consultationRooms.set(currentConsultationId, new Set());
-          }
+        currentConsultationId = String(payload.consultation_id);
+        if (!consultationRooms.has(currentConsultationId)) {
+          consultationRooms.set(currentConsultationId, new Set());
+        }
+
+        // ✅ FIX: Lọc null ra khỏi existingUsers trước khi dùng
+        const existingUsers = [...consultationRooms.get(currentConsultationId)]
+          .filter(uid => uid !== null && uid !== undefined);
+
+        // ✅ FIX: Chỉ add userId hợp lệ
+        if (userId) {
           consultationRooms.get(currentConsultationId).add(userId);
-          console.log(`🏠 User ${userId} đã vào phòng consultation ${currentConsultationId}`);
+        }
+        console.log(`🏠 User ${userId} đã vào phòng consultation ${currentConsultationId}. Existing: ${existingUsers}`);
+        
+        // Thông báo cho những người đã ở trong phòng
+        if (userId) {
           broadcastToConsultation(currentConsultationId, {
             type: 'user_joined',
             payload: { user_id: userId }
           }, userId);
-          break;
+        }
+        
+        // Gửi lại cho người mới join biết ai đã ở trong phòng
+        if (existingUsers.length > 0 && ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({
+            type: 'room_members',
+            payload: { existing_users: existingUsers }
+          }));
+        }
+        break;
 
         // Gửi tin nhắn trong phòng consultation
         case 'send_message':
@@ -288,12 +308,14 @@ wss.on('connection', (ws, req) => {
 
         // Tín hiệu WebRTC (offer/answer/candidate)
         case 'webrtc_signal':
-          if (payload.target_user_id) {
-            sendToUser(payload.target_user_id, {
-              type: 'webrtc_signal',
-              payload: { ...payload, from_user_id: userId }
-            });
-          }
+        case 'webrtc_offer':
+        case 'webrtc_answer':
+        case 'webrtc_ice_candidate':
+          broadcastToConsultation(
+            payload.consultation_id || currentConsultationId,
+            { type, payload: { ...payload, from_user_id: userId } },
+            userId
+          );
           break;
 
         // Admin action lên một phòng
@@ -310,8 +332,16 @@ wss.on('connection', (ws, req) => {
           break;
         }
 
-        default:
-          console.log(`⚠️ Unknown message type: ${type}`);
+        case 'emoji_reaction':
+        broadcastToConsultation(
+          payload.consultation_id || currentConsultationId,
+          { type: 'emoji_reaction', payload },
+          userId
+        );
+        break;
+
+      default:
+        console.log(`⚠️ Unknown message type: ${type}`);
       }
     } catch (error) {
       console.error('Error processing WebSocket message:', error);

@@ -435,7 +435,7 @@ try {
     user_id: doctor_id,
     type: 'appointment',
     message: '🔔 Bạn có lịch tư vấn mới cần xác nhận',
-    link: `/lich-tu-van-cua-toi`,
+    link: `/quan-ly-tu-van/realtime`,
     is_read: false
   }, { transaction });
 // 10.  THÊM MỚI: Gửi thông báo cho TẤT CẢ ADMIN
@@ -451,7 +451,7 @@ for (const admin of admins) {
     user_id: admin.id,
     type: 'appointment',
     message: `📋 Lịch tư vấn mới ${consultation.consultation_code} cần phê duyệt`,
-    link: `/admin/tu-van/realtime/all`, // Link đến trang quản lý admin
+    link: `/quan-ly-tu-van/realtime`,// Link đến trang quản lý admin
     is_read: false
   }, { transaction });
 }
@@ -861,7 +861,11 @@ exports.completeConsultation = async (req, res) => {
     }
 
     const consultation = await models.Consultation.findOne({
-      where: { id, doctor_id, status: 'in_progress' }
+      where: { 
+        id, 
+        doctor_id, 
+        status: { [Op.in]: ['in_progress', 'confirmed'] }
+      }
     });
 
     if (!consultation) {
@@ -893,12 +897,11 @@ exports.completeConsultation = async (req, res) => {
     consultation.medical_record_status = 'has_record';
     await consultation.save();
 
-    //  FIX: Tạo thông báo cho bệnh nhân
     await models.Notification.create({
       user_id: consultation.patient_id,
-      type: 'appointment',
-      message: ' Buổi tư vấn đã hoàn thành. Bác sĩ đã gửi kết quả',
-      link: `/tu-van/${consultation.id}`,
+      type: 'consultation',
+      message: '✅ Buổi tư vấn đã hoàn thành. Bác sĩ đã gửi kết quả',
+      link: `/danh-sach-ho-so?tab=records`,
       is_read: false
     });
 
@@ -1374,9 +1377,9 @@ exports.cancelConsultation = async (req, res) => {
 
     consultation.status = 'cancelled';
     consultation.cancelled_at = new Date();
-    consultation.cancelled_by = userId;
-    consultation.cancellation_reason = reason;
-    consultation.refund_percent = refundPercent;
+    consultation.cancelled_by = userRole; // 'patient' | 'doctor' | 'admin'
+    consultation.cancel_reason = reason;  // sửa tên field đúng với DB
+    await consultation.save();
     await consultation.save();
 
     //  FIX: Tạo thông báo cho người còn lại
@@ -2201,7 +2204,28 @@ exports.getConsultationReports = async (req, res) => {
     const reports = await models.ConsultationReport.findAndCountAll({
       where,
       include: [
-        { model: models.Consultation, as: 'consultation', attributes: ['id', 'consultation_code'] },
+        {
+          model: models.Consultation,
+          as: 'consultation',
+          attributes: ['id', 'consultation_code', 'appointment_time', 'consultation_type', 'status'],
+          include: [
+            {
+              model: models.User,
+              as: 'doctor',
+              attributes: ['id', 'full_name', 'phone']
+            },
+            {
+              model: models.User,
+              as: 'patient',
+              attributes: ['id', 'full_name', 'phone']
+            },
+            {
+              model: models.ConsultationPricing,
+              as: 'package',
+              attributes: ['id', 'package_name', 'duration_minutes', 'price']
+            }
+          ]
+        },
         { model: models.User, as: 'reporter', attributes: ['id', 'full_name', 'email'] }
       ],
       limit: parseInt(limit),
@@ -2265,7 +2289,7 @@ exports.resolveReport = async (req, res) => {
       user_id: report.reporter_id,
       type: 'appointment',
       message: `✅ Báo cáo của bạn đã được xử lý: ${status}`,
-      link: `/lich-tu-van-cua-toi?type=reports`,
+      link: `/quan-ly-tu-van/realtime`,
       is_read: false
     });
 

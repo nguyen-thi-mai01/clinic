@@ -666,13 +666,10 @@ exports.updateDoctorPackage = async (req, res) => {
 exports.createPackage = async (req, res) => {
   try {
     const {
-      package_name,
-      description,
-      package_type, // <-- MỚI
-      duration_minutes, // <-- MỚI
-      price, // <-- MỚI
-      notes,
-      is_active = true
+      package_name, package_code, description,
+      image_url, features,
+      package_type, duration_minutes, price,
+      doctor_codes, notes, is_active
     } = req.body;
 
     // Validation
@@ -711,11 +708,14 @@ exports.createPackage = async (req, res) => {
       package_name,
       package_code: packageCode,
       description,
+      image_url: image_url || null,
+      features: features ? (Array.isArray(features) ? features : JSON.parse(features)) : null,
       package_type,
       duration_minutes: parseInt(duration_minutes),
       price: parseFloat(price),
+      doctor_codes: doctor_codes || null,
       notes,
-      is_active
+      is_active: is_active !== false
     });
 
     return res.status(201).json({
@@ -759,6 +759,10 @@ exports.updatePackage = async (req, res) => {
       });
     }
 
+    // Normalize image_url và features từ updateData
+    if (updateData.features && !Array.isArray(updateData.features)) {
+      try { updateData.features = JSON.parse(updateData.features); } catch { updateData.features = []; }
+    }
     await pkg.update(updateData);
 
     return res.status(200).json({
@@ -785,8 +789,8 @@ exports.deletePackage = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const package = await models.ConsultationPricing.findByPk(id);
-    if (!package) {
+    const pkg = await models.ConsultationPricing.findByPk(id);
+    if (!pkg) {
       return res.status(404).json({
         success: false,
         message: 'Không tìm thấy gói dịch vụ'
@@ -797,7 +801,7 @@ exports.deletePackage = async (req, res) => {
     let consultationCount = 0;
     
     // Chỉ kiểm tra nếu gói này được gán cho một bác sĩ cụ thể
-    if (package.doctor_id) { 
+    if (pkg.doctor_id) {
       consultationCount = await models.Consultation.count({
         where: { consultation_pricing_id: id }// <-- SỬA LỖI Ở ĐÂY
       });
@@ -810,7 +814,7 @@ exports.deletePackage = async (req, res) => {
       });
     }
 
-    await package.destroy();
+    await pkg.destroy();
 
     return res.status(200).json({
       success: true,
@@ -1671,9 +1675,8 @@ exports.approveConsultation = async (req, res) => {
     await models.Notification.create({
       user_id: consultation.doctor_id,
       type: 'appointment',
-      // LỖI DO DÒNG CŨ DÙNG 'content', HÃY ĐỔI THÀNH 'message'
       message: `🗓️ Bạn có một lịch tư vấn mới (Mã: ${consultation.consultation_code}) đã được admin phê duyệt.`, 
-      link: `/lich-tu-van-cua-toi`,
+      link: `/quan-ly-tu-van/realtime`,
       is_read: false
     });
     // --- HẾT ĐOẠN SỬA ---
@@ -1853,9 +1856,8 @@ exports.cancelConfirmedConsultation = async (req, res) => {
     await models.Notification.create({
       user_id: consultation.doctor_id,
       type: 'system',
-      // ĐỔI 'content' THÀNH 'message'
       message: `❌ Lịch tư vấn (Mã: ${consultation.consultation_code}) của bạn đã bị Admin hủy. Lý do: ${reason}`,
-      link: `/lich-tu-van-cua-toi`,
+      link: `/quan-ly-tu-van/realtime`,
       is_read: false
     });
     // --- HẾT ĐOẠN SỬA ---

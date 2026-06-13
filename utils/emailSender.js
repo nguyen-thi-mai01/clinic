@@ -27,8 +27,13 @@ const BASE_STYLE = `
 
 const createTransporter = () => {
   const config = {
-    service: 'gmail',
-    auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_PASS }
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
+    auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_PASS },
+    connectionTimeout: 10000, // Cắt kết nối nếu Google không phản hồi sau 10s (Tránh lỗi 502)
+    greetingTimeout: 10000,
+    socketTimeout: 10000
   };
   if (process.env.NODE_ENV === 'development') console.log('[Email System] Running in development mode');
   return nodemailer.createTransport(config);

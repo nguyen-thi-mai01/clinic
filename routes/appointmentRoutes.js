@@ -12,9 +12,12 @@ const { authenticateToken, authenticateTokenOptional, authorize } = require('../
  * Lấy lịch trống của bác sĩ
  * Query params: doctor_id, date, service_id
  */
+// ========== PUBLIC ROUTES ==========
 router.get('/available-slots', appointmentController.getAvailableSlots);
-
 router.post('/recover-codes', appointmentController.recoverAppointmentCodes);
+
+// Public ratings — không cần auth, chỉ trả approved
+router.get('/public-ratings', appointmentController.getPublicRatings);
 
 /**
  * Lấy lịch hẹn theo guest token

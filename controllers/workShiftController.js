@@ -80,6 +80,30 @@ exports.updateWorkShiftConfig = async (req, res) => {
       results.push(shift);
     }
 
+    // Gửi thông báo cho tất cả bác sĩ và nhân viên
+    const recipients = await models.User.findAll({
+      where: {
+        role: ['doctor', 'staff'],
+        is_active: true
+      },
+      attributes: ['id']
+    });
+
+    const shiftSummary = results
+      .filter(s => s.is_active)
+      .map(s => `${s.display_name} (${s.start_time.slice(0,5)}–${s.end_time.slice(0,5)})`)
+      .join(', ');
+
+    await Promise.all(recipients.map(u =>
+      models.Notification.create({
+        user_id: u.id,
+        type: 'system',
+        message: `📋 Cấu hình ca làm việc vừa được cập nhật: ${shiftSummary}. Vui lòng kiểm tra lịch của bạn.`,
+        link: '/lich-cua-toi',
+        is_read: false
+      })
+    ));
+
     res.status(200).json({
       success: true,
       message: 'Cập nhật cấu hình ca làm việc thành công.',

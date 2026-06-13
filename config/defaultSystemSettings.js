@@ -530,6 +530,70 @@ const getDefaultSystemSettings = () => {
       }
     },
 
+    // ======================= 9. SERVICES PAGE =======================
+    {
+      setting_key: 'services_page',
+      value_json: {
+        // ── Hero ──
+        hospital_hero: {
+          image: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=2000',
+          title: 'Dịch Vụ Y Tế Chuyên Sâu',
+          subtitle: 'Trải nghiệm quy trình khám chữa bệnh hiện đại, tận tâm tại bệnh viện.'
+        },
+        consultation_hero: {
+          image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=2000',
+          title: 'Bác Sĩ Trực Tuyến 24/7',
+          subtitle: 'Kết nối ngay với chuyên gia y tế qua Video / Chat — mọi lúc, mọi nơi.'
+        },
+        // ── Stats (số liệu nổi bật hero) ──
+        hero_stats: [
+          { num: '500+', lbl: 'Bác sĩ' },
+          { num: '200+', lbl: 'Dịch vụ' },
+          { num: '50k+', lbl: 'Bệnh nhân' },
+          { num: '4.9★', lbl: 'Đánh giá' }
+        ],
+        // ── Quy trình 3 bước (tab tư vấn) ──
+        consultation_steps: [
+          {
+            num: '01',
+            icon: 'FaUserPlus',
+            label: 'Chọn Bác sĩ',
+            desc: 'Tìm bác sĩ phù hợp với chuyên khoa và nhu cầu của bạn.'
+          },
+          {
+            num: '02',
+            icon: 'FaCalendarCheck',
+            label: 'Đặt Lịch hẹn',
+            desc: 'Chọn khung giờ trống, xác nhận thông tin và thanh toán.'
+          },
+          {
+            num: '03',
+            icon: 'FaVideo',
+            label: 'Bắt đầu Tư vấn',
+            desc: 'Tham gia phòng tư vấn qua Video hoặc Chat đúng giờ hẹn.'
+          }
+        ],
+        // ── Cam kết (Why Choose Us) ──
+        why_choose: [
+          { icon: 'FaUserMd',   title: '500+ Bác Sĩ Giỏi',    desc: 'Đội ngũ chuyên gia đầu ngành từ các bệnh viện lớn.', color: '#0ea5a4' },
+          { icon: 'FaBolt',     title: 'Kết Nối Tức Thì',      desc: 'Không xếp hàng, kết nối bác sĩ chỉ sau vài giây.',  color: '#f39c12' },
+          { icon: 'FaShieldAlt',title: 'Bảo Mật Tuyệt Đối',   desc: 'Hồ sơ bệnh án được mã hóa chuẩn quốc tế.',          color: '#3b82f6' },
+          { icon: 'FaWallet',   title: 'Chi Phí Hợp Lý',       desc: 'Tiết kiệm chi phí đi lại và thời gian chờ đợi.',    color: '#8b5cf6' }
+        ],
+        // ── CTA Banner (tab hospital) ──
+        hospital_cta: {
+          title: 'Cần hỗ trợ chọn dịch vụ?',
+          subtitle: 'Đội ngũ tư vấn của chúng tôi sẵn sàng giúp bạn 24/7.',
+          phone: '1900 1234'
+        },
+        // ── CTA Banner (tab tư vấn) ──
+        consultation_cta: {
+          title: 'Sẵn sàng gặp bác sĩ ngay hôm nay?',
+          subtitle: 'Đặt lịch chỉ mất 2 phút. Tư vấn bắt đầu trong 15 phút.'
+        }
+      }
+    },
+
     // ===== [MỚI] APPOINTMENT OPTIMIZATION CONFIG =====
     {
       setting_key: 'appointment_capacity_config',

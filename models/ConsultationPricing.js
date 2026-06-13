@@ -32,6 +32,19 @@ module.exports = (sequelize) => {
       allowNull: true,
       comment: 'Mô tả ngắn cho gói'
     },
+
+    image_url: {
+      type: DataTypes.STRING(500),
+      allowNull: true,
+      comment: 'Ảnh đại diện gói tư vấn'
+    },
+
+    features: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      defaultValue: null,
+      comment: 'Danh sách tính năng ["Chat 24/7", "Hỗ trợ tài liệu"]'
+    },
     
     // Loại gói (Chat hay Video)
     package_type: {

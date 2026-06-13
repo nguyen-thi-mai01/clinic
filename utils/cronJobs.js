@@ -188,9 +188,9 @@ const sendConsultationReminders = cron.schedule('* * * * *', async () => {
           // 3. Thông báo (chuông) cho Bác sĩ
           await models.Notification.create({
             user_id: consultation.doctor_id,
-            type: 'appointment', //  SỬA: Dùng giá trị có trong ENUM
-            message: ` Sắp đến giờ Video Call với BN ${consultation.patient.full_name || 'bệnh nhân'} sau 5 phút.`, //  SỬA: Thêm fallback cho null
-            link: `/lich-tu-van-cua-toi`,
+            type: 'appointment',
+            message: ` Sắp đến giờ Video Call với BN ${consultation.patient.full_name || 'bệnh nhân'} sau 5 phút.`,
+            link: `/tu-van/video/${consultation.id}`,
             is_read: false
           });
 
@@ -201,7 +201,7 @@ const sendConsultationReminders = cron.schedule('* * * * *', async () => {
             title: ' Sắp đến giờ Video Call',
             message: `Bạn có lịch Video Call với BS ${consultation.doctor.full_name} sau 5 phút.`,
             content: `Bạn có lịch Video Call với BS ${consultation.doctor.full_name} sau 5 phút.`,
-            link: videoLink
+            link: `/tu-van/video/${consultation.id}`
           });
 
           // 5. Cập nhật CSDL
@@ -258,7 +258,7 @@ const sendConsultationReminders = cron.schedule('* * * * *', async () => {
             title: ' Sắp đến giờ tư vấn',
             message: `Bạn có lịch tư vấn với BN ${consultation.patient.full_name} sau 5 phút.`,
             content: `Bạn có lịch tư vấn với BN ${consultation.patient.full_name} sau 5 phút.`,
-            link: `/lich-tu-van-cua-toi`
+            link: `/tu-van/${consultation.id}/chat`
           });
 
           // 5. Tạo thông báo (chuông) cho Bệnh nhân
@@ -268,9 +268,8 @@ const sendConsultationReminders = cron.schedule('* * * * *', async () => {
             title: ' Sắp đến giờ tư vấn',
             message: `Bạn có lịch tư vấn với BS ${consultation.doctor.full_name} sau 5 phút.`,
             content: `Bạn có lịch tư vấn với BS ${consultation.doctor.full_name} sau 5 phút.`,
-            link: chatLink
+            link: `/tu-van/${consultation.id}/chat`
           });
-
           // 6. Cập nhật CSDL
           await consultation.update({ 
             chat_otp: otp, 

@@ -515,7 +515,7 @@ router.put(
 router.put(
   '/admin/realtime/:id/cancel-confirmed',
   authMiddleware,
-  roleMiddleware('consultations:close'),
+  roleMiddleware('consultations:close', ['admin', 'staff', 'patient', 'doctor']),
   consultationAdminController.cancelConfirmedConsultation
 );
 

@@ -3344,9 +3344,16 @@ exports.getMedicines = async (req, res) => {
       ];
     }
     
-    // Thêm điều kiện lọc theo category_id
-    if (category_id) {
-      whereCondition.category_id = category_id;
+    // Thêm điều kiện lọc theo category_id (Hỗ trợ cả ID, Slug và 'all')
+    if (category_id && category_id !== 'all' && category_id !== '') {
+      if (isNaN(category_id)) {
+        // Nếu frontend truyền slug thay vì id (vd: ?category_id=thuoc-giam-dau)
+        const cat = await Category.findOne({ where: { slug: category_id } });
+        whereCondition.category_id = cat ? cat.id : -1; // -1 để trả về mảng rỗng nếu slug sai
+      } else {
+        // Nếu truyền đúng ID số
+        whereCondition.category_id = parseInt(category_id);
+      }
     }
     
     // Thêm điều kiện lọc theo chữ cái đầu (kết hợp với search, không ghi đè)
@@ -3909,9 +3916,16 @@ exports.getDiseases = async (req, res) => {
       ];
     }
     
-    // Thêm điều kiện lọc theo category_id
-    if (category_id) {
-      whereCondition.category_id = category_id;
+    // Thêm điều kiện lọc theo category_id (Hỗ trợ cả ID, Slug và 'all')
+    if (category_id && category_id !== 'all' && category_id !== '') {
+      if (isNaN(category_id)) {
+        // Nếu frontend truyền slug thay vì id
+        const cat = await Category.findOne({ where: { slug: category_id } });
+        whereCondition.category_id = cat ? cat.id : -1;
+      } else {
+        // Nếu truyền đúng ID số
+        whereCondition.category_id = parseInt(category_id);
+      }
     }
     
     // Thêm điều kiện lọc theo chữ cái đầu (kết hợp với search, không ghi đè)
