@@ -37,7 +37,7 @@ const sendEmail = async (emailData) => {
 
     const resend = new Resend(process.env.RESEND_API_KEY);
     const result = await resend.emails.send({
-      from: `${process.env.HOSPITAL_NAME || 'Easy Medify'} <onboarding@resend.dev>`,
+      from: `${process.env.HOSPITAL_NAME || 'Easy Medify'} <support@easymedify.com>`,
       to,
       subject,
       html: emailContent,
